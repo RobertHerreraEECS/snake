@@ -72,6 +72,19 @@ class Game(object):
             y = random.randint(1,game_screen.y - 2)
 
         return x,y
+    def check_move(self, direction, prev_move):
+        if direction == 259 and prev_move != 258: # up
+            return False
+        elif direction == 258 and prev_move != 259: # down
+            return False
+        elif direction == 261 and prev_move != 260: # right
+            return False
+        elif direction == 260 and prev_move != 261: # left
+            return False
+        else:
+            return True
+
+        return False
     def printScreen(self,stdscr,game_screen,snake,food):
         # stdscr.addstr(str(game_screen.screen) + ' ',curses.color_pair(1))
         curses.start_color()
@@ -196,11 +209,19 @@ def main(stdscr):
             # get keyboard input, returns -1 if none available
             c = stdscr.getch()
             if c != -1 : # if user enters direction info
-                # check direction value
-                move_status = main_game.check_bounds(game_screen,c,snake)
-                if move_status == True:
-                    snake.move(c,move_status)
-                prev_move = c
+                # check for illegal moves
+                illegal_move_status = main_game.check_move(c,prev_move)
+
+                if illegal_move_status == False:
+                    # check direction value
+                    move_status = main_game.check_bounds(game_screen,c,snake)
+                    if move_status == True:
+                        snake.move(c,move_status)
+                    prev_move = c
+                else:
+                    move_status = main_game.check_bounds(game_screen,prev_move,snake)
+                    if move_status == True:
+                        snake.move(prev_move,move_status)
             else: # else screen is updated
                 # update logic
                 # continue momentum on previous movement
@@ -227,13 +248,41 @@ def main(stdscr):
                 stdscr.refresh()
                 stdscr.move(0, 0)
                 continue
+            if len(snake.body) == game_screen.x * game_screen.y:
+                win = True
+                stdscr.addstr('You win\n')
+                c = stdscr.getch()
+                if c != -1 : # if user enters direction info
+                    # check direction value
+                    stdscr.addstr(str(c)+'\n\n\n')
+                stdscr.refresh()
+                stdscr.move(0, 0)
+                continue
+
 
             game_screen.refresh()
             game_screen.impose(snake.body,snake.body_id)
             game_screen.impose([food.body],food.body_id)
             main_game.printScreen(stdscr,game_screen,snake,food)
-        else:
+        elif gameOver == True:
             stdscr.addstr('Game over\n')
+            stdscr.addstr('"q" to quit and "n" to start new game\n')
+            c = stdscr.getch()
+            if c == 113:
+                break
+            if c == 110:
+                gameOver = False
+                win      = False
+                snake.setInitBody((game_screen.x/2),(game_screen.x/2))
+                snake.bodySize = 1
+                snake.body = snake.body[0:1]
+                game_screen.impose(snake.body,snake.body_id)
+                continue
+            stdscr.refresh()
+            stdscr.move(0, 0)
+            time.sleep(0.2)
+        else:
+            stdscr.addstr('You win\n')
             stdscr.addstr('"q" to quit and "n" to start new game\n')
             c = stdscr.getch()
             if c == 113:

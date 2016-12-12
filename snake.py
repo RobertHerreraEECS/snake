@@ -100,13 +100,13 @@ class Game(object):
                 elif game_screen.screen[i,j] == 0:
                     stdscr.addstr(' ' + ' ',curses.color_pair(1))
                 elif game_screen.screen[i,j] == 3:
-                    stdscr.addstr(' ' + ' ',curses.color_pair(3))
+                    stdscr.addstr('*' + ' ',curses.color_pair(3))
                 elif game_screen.screen[i,j] == 8:
                     stdscr.addstr(' ' + ' ',curses.color_pair(2))
             stdscr.addstr('\n')
         stdscr.refresh()
         stdscr.move(0, 0)
-        time.sleep(0.2)
+        time.sleep(0.1)
 
 
 
